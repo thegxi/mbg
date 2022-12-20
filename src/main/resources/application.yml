@@ -1,2 +1,11 @@
 server:
   port: 8080
+spring:
+  datasource:
+    dbcp2:
+      initial-size: 5
+      min-idle: 10
+      max-conn-lifetime-millis: 1000
+      max-wait-millis: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000

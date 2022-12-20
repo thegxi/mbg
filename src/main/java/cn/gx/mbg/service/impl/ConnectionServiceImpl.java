@@ -10,6 +10,8 @@ import cn.gx.mbg.utils.DbUrlUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -23,7 +25,7 @@ import java.sql.SQLException;
 @Service
 public class ConnectionServiceImpl implements ConnectionService {
   @Override
-  public RespTemplate testCon(ConnectionRequest connectionRequest) {
+  public RespTemplate testCon(ConnectionRequest connectionRequest, HttpServletRequest request) {
     String dbUrl = "";
     String driver = "";
     String dbType = connectionRequest.getType();
@@ -48,12 +50,12 @@ public class ConnectionServiceImpl implements ConnectionService {
       default:
         throw new MbgBusinessException("不支持的数据库类型");
     }
-    connection(driver, dbUrl, username, pwd);
+    connection(driver, dbUrl, username, pwd, request);
     return RespTemplate.success("连接成功");
   }
 
   @Override
-  public RespTemplate urlCon(ConnectionRequest connectionRequest) {
+  public RespTemplate urlCon(ConnectionRequest connectionRequest, HttpServletRequest request) {
     String driver;
     String dbUrl = connectionRequest.getUrl();
     String dbType = DbUrlUtil.getDbType(dbUrl);
@@ -76,15 +78,18 @@ public class ConnectionServiceImpl implements ConnectionService {
       default:
         return RespTemplate.fail("暂不支持的数据库类型");
     }
-    connection(driver, dbUrl, username, pwd);
+    connection(driver, dbUrl, username, pwd, request);
     return RespTemplate.success("连接成功");
   }
 
-  private void connection(String driver, String dbUrl, String username, String pwd) {
+  private void connection(String driver, String dbUrl, String username, String pwd, HttpServletRequest request) {
     try {
       Class.forName(driver);
       Connection connection = DriverManager.getConnection(dbUrl, username, pwd);
-      connection.close();
+      // 保存连接到当前session
+      HttpSession session = request.getSession();
+      session.setAttribute("curCon", connection);
+      session.setMaxInactiveInterval(10000);
     } catch (ClassNotFoundException e) {
       log.error(e.getMessage());
       throw new MbgBusinessException("数据库驱动错误,请检查驱动");

@@ -1,6 +1,6 @@
 package cn.gx.mbg.utils;
 
-import cn.gx.mbg.dto.ConnectionDTO;
+import cn.gx.mbg.enums.DbType;
 import cn.gx.mbg.exception.MbgBusinessException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,5 +45,23 @@ public class DbUrlUtil {
       throw new MbgBusinessException("url格式不正确");
     }
     return stringArr[1];
+  }
+
+  public static String getDbUrlPrefixByType(DbType dbType) {
+    String dbUrl = "";
+    switch (dbType) {
+      case MYSQL:
+        dbUrl = "jdbc:mysql://";
+        break;
+      case ORACLE:
+        dbUrl = "jdbc:oracle:thin:@";
+        break;
+      case SQL_SERVER:
+        dbUrl = "jdbc:sqlserver://";
+        break;
+      default:
+        throw new MbgBusinessException("不支持的数据库类型");
+    }
+    return dbUrl;
   }
 }

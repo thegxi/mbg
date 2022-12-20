@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 连接控制器
@@ -25,7 +26,8 @@ public class ConnectionController {
   private ConnectionService connectionService;
 
   @PostMapping("/testCon")
-  public RespTemplate normalCon(@RequestBody ConnectionRequest connectionRequest) {
+  public RespTemplate normalCon(@RequestBody ConnectionRequest connectionRequest,
+                                HttpServletRequest request) {
     if (ObjectUtils.isEmpty(connectionRequest) ||
         StringUtils.isAnyEmpty(
                 connectionRequest.getType(),
@@ -34,18 +36,22 @@ public class ConnectionController {
                 connectionRequest.getPwd())) {
       return RespTemplate.customEnum(ResultEnum.ERROR_PARAM);
     }
-    return connectionService.testCon(connectionRequest);
+    System.out.println(request.getSession().getId());
+    return connectionService.testCon(connectionRequest, request);
   }
 
   @PostMapping("/urlCon")
-  public RespTemplate urlCon(@RequestBody ConnectionRequest connectionRequest) {
+  public RespTemplate urlCon(@RequestBody ConnectionRequest connectionRequest,
+                             HttpServletRequest request) {
     if (ObjectUtils.isEmpty(connectionRequest) ||
             StringUtils.isAnyEmpty(
                     connectionRequest.getUrl(),
                     connectionRequest.getUsername(),
                     connectionRequest.getPwd())) {
+      System.out.println(request.getSession().getId());
       return RespTemplate.customEnum(ResultEnum.ERROR_PARAM);
     }
-    return connectionService.urlCon(connectionRequest);
+    System.out.println(request.getSession().getId());
+    return connectionService.urlCon(connectionRequest, request);
   }
 }
